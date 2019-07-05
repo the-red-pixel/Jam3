@@ -1,12 +1,12 @@
 package com.theredpixelteam.jam3.attribute;
 
 import com.theredpixelteam.jam3.constant.ConstantPool;
+import com.theredpixelteam.jam3.util.BigEndian;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -57,17 +57,16 @@ public class AttributePool {
     public @Nonnull byte[] toBytes()
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
 
         try {
             for (AttributeEntry entry : list)
             {
-                dos.writeShort(entry.getNameTagRef().getRefIndex());
+                BigEndian.pushU2(baos, entry.getNameTagRef().getRefIndex());
 
                 byte[] byts = entry.toBytes();
 
-                dos.writeInt(byts.length);
-                dos.write(byts);
+                BigEndian.pushU4(baos, byts.length);
+                baos.write(byts);
             }
         } catch (IOException e) {
             throw new Error(e);

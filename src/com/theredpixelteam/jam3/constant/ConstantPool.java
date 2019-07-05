@@ -6,7 +6,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -26,19 +25,18 @@ public class ConstantPool {
                             @Nonnull ByteBuffer byteBuffer)
     {
         for (int i = 0; i < length; i++)
-            ConstantTag.from(dstPool, attributePool, byteBuffer);
+            ConstantTag.from(dstPool, byteBuffer);
     }
 
     public @Nonnull byte[] toBytes()
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
 
         try {
             for (ConstantTag tag : tags)
             {
-                dos.writeByte(tag.getTagType().getTag());
-                dos.write(tag.toBytes());
+                baos.write(tag.getTagType().getTag());
+                baos.write(tag.toBytes());
             }
         } catch (IOException e) {
             throw new Error(e);

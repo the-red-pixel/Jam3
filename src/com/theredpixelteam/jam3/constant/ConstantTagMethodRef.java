@@ -4,7 +4,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
-public class ConstantTagMethodRef extends ConstantTagAccessibleObjectRef {
+public class ConstantTagMethodRef extends ConstantTagAccessibleObjectRefBase {
     ConstantTagMethodRef(@Nonnull ConstantPool pool,
                          @Nonnegative int index)
     {

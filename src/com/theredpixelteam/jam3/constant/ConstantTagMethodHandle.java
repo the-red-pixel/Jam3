@@ -74,11 +74,12 @@ public class ConstantTagMethodHandle extends ConstantTag {
         return tagRef;
     }
 
-    public @Nullable ConstantTagAccessibleObjectRef getTag()
+    public @Nullable
+    ConstantTagAccessibleObjectRefBase getTag()
     {
         refType.checkType(tagRef);
 
-        return tagRef.get(null, ConstantTagAccessibleObjectRef.class);
+        return tagRef.get(null, ConstantTagAccessibleObjectRefBase.class);
     }
 
     public void setTagRef(@Nonnull ConstantPool.TagRef tagRef)

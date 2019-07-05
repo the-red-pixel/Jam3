@@ -4,7 +4,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 
-public class ConstantTagFieldRef extends ConstantTagAccessibleObjectRef {
+public class ConstantTagFieldRef extends ConstantTagAccessibleObjectRefBase {
     ConstantTagFieldRef(@Nonnull ConstantPool pool,
                         @Nonnegative int index)
     {

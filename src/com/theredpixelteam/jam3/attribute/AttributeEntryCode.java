@@ -6,7 +6,6 @@ import com.theredpixelteam.jam3.util.BigEndian;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -67,25 +66,23 @@ public class AttributeEntryCode extends AttributeEntry {
     public @Nonnull byte[] toBytes()
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
 
         try {
-            dos.writeShort(maxStack);
-            dos.writeShort(maxLocals);
+            BigEndian.pushU2(baos, maxStack);
+            BigEndian.pushU2(baos, maxLocals);
 
-            dos.writeInt(code.length);
-            dos.write(code);
+            BigEndian.pushU4(baos, code.length);
+            baos.write(code);
 
-            dos.writeShort(exceptionTable.length);
+            BigEndian.pushU2(baos, exceptionTable.length);
             for (ExceptionInfo exceptionInfo : exceptionTable)
-                dos.write(exceptionInfo.toBytes());
+                baos.write(exceptionInfo.toBytes());
 
-            dos.writeShort(attributes.size());
-            dos.write(attributes.toBytes());
+            BigEndian.pushU2(baos, attributes.size());
+            baos.write(attributes.toBytes());
         } catch (IOException e) {
-            throw new Error(e);
-
             // unused
+            throw new Error(e);
         }
 
         return baos.toByteArray();

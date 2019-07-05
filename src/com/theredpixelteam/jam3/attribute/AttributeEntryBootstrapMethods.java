@@ -2,11 +2,11 @@ package com.theredpixelteam.jam3.attribute;
 
 import com.theredpixelteam.jam3.constant.ConstantPool;
 import com.theredpixelteam.jam3.constant.ConstantTag;
+import com.theredpixelteam.jam3.util.BigEndian;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -46,17 +46,11 @@ public class AttributeEntryBootstrapMethods extends AttributeEntry {
     public @Nonnull byte[] toBytes()
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
 
-        try {
-            dos.writeShort(bootstrapMethods.length);
+        BigEndian.pushU2(baos, bootstrapMethods.length);
 
-            for (int i = 0; i < bootstrapMethods.length; i++)
-                bootstrapMethods[i].push(dos);
-        } catch (IOException e) {
-            // unused
-            throw new Error(e);
-        }
+        for (int i = 0; i < bootstrapMethods.length; i++)
+            bootstrapMethods[i].push(baos);
 
         return baos.toByteArray();
     }
@@ -102,19 +96,14 @@ public class AttributeEntryBootstrapMethods extends AttributeEntry {
             return new BootstrapMethodInfo(constantPool, bootstrapMethodTagRef, parameterTagRefs);
         }
 
-        public void push(@Nonnull DataOutputStream dos)
+        public void push(@Nonnull ByteArrayOutputStream baos)
         {
-            try {
-                dos.writeShort(bootstrapMethodTagRef.getRefIndex());
+            BigEndian.pushU2(baos, bootstrapMethodTagRef.getRefIndex());
 
-                dos.writeShort(parameterTagRefs.length);
+            BigEndian.pushU2(baos, parameterTagRefs.length);
 
-                for (int i = 0; i < parameterTagRefs.length; i++)
-                    dos.writeShort(parameterTagRefs[i].getRefIndex());
-            } catch (IOException e) {
-                // unused
-                throw new Error(e);
-            }
+            for (int i = 0; i < parameterTagRefs.length; i++)
+                BigEndian.pushU2(baos, parameterTagRefs[i].getRefIndex());
         }
 
         public @Nonnull ConstantPool.TagRef getBootstrapMethodTagRef()

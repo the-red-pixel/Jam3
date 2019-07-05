@@ -8,19 +8,19 @@ import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-public abstract class ConstantTagAccessibleObjectRef extends ConstantTag {
-    ConstantTagAccessibleObjectRef(@Nonnull Type tagType,
-                                   @Nonnull ConstantPool pool,
-                                   @Nonnegative int index)
+public abstract class ConstantTagAccessibleObjectRefBase extends ConstantTag {
+    ConstantTagAccessibleObjectRefBase(@Nonnull Type tagType,
+                                       @Nonnull ConstantPool pool,
+                                       @Nonnegative int index)
     {
         super(tagType, pool, index);
     }
 
-    ConstantTagAccessibleObjectRef(@Nonnull Type tagType,
-                                   @Nonnull ConstantPool pool,
-                                   @Nonnegative int index,
-                                   @Nonnull ConstantPool.TagRef classTagRef,
-                                   @Nonnull ConstantPool.TagRef nameNTypeTagRef)
+    ConstantTagAccessibleObjectRefBase(@Nonnull Type tagType,
+                                       @Nonnull ConstantPool pool,
+                                       @Nonnegative int index,
+                                       @Nonnull ConstantPool.TagRef classTagRef,
+                                       @Nonnull ConstantPool.TagRef nameNTypeTagRef)
     {
         this(tagType, pool, index);
 
