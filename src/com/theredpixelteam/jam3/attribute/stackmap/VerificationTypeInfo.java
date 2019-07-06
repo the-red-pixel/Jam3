@@ -29,7 +29,9 @@ public class VerificationTypeInfo {
     public static @Nonnull VerificationTypeInfo from(@Nonnull ConstantPool constantPool,
                                                      @Nonnull ByteBuffer byteBuffer)
     {
-        return from(constantPool, getType(byteBuffer), byteBuffer);
+        Type type = getType(byteBuffer);
+
+        return type.getInterpreter().from(constantPool, type, byteBuffer);
     }
 
     public static @Nonnull VerificationTypeInfo from(@Nonnull ConstantPool constantPool,

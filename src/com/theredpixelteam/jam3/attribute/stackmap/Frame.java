@@ -1,7 +1,6 @@
 package com.theredpixelteam.jam3.attribute.stackmap;
 
 import com.theredpixelteam.jam3.constant.ConstantPool;
-import sun.util.calendar.LocalGregorianCalendar;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

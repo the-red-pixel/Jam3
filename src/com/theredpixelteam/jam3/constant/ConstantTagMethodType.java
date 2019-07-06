@@ -1,6 +1,5 @@
 package com.theredpixelteam.jam3.constant;
 
-import com.theredpixelteam.jam3.attribute.AttributePool;
 import com.theredpixelteam.jam3.util.BigEndian;
 
 import javax.annotation.Nonnegative;
@@ -26,7 +25,6 @@ public class ConstantTagMethodType extends ConstantTag {
     }
 
     public static @Nonnull ConstantTagMethodType from(@Nonnull ConstantPool pool,
-                                                      @Nonnull AttributePool attributePool,
                                                       @Nonnull ByteBuffer byteBuffer)
     {
         int descriptorTagRef = byteBuffer.getShort() & 0xFFFF;

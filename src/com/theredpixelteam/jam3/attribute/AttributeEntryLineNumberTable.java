@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
+@SuppressWarnings("all")
 public class AttributeEntryLineNumberTable extends AttributeEntry {
     public AttributeEntryLineNumberTable(@Nonnull AttributePool owner,
                                          @Nonnegative int index,
@@ -28,9 +29,9 @@ public class AttributeEntryLineNumberTable extends AttributeEntry {
     {
         int lineNumberTableSize = byteBuffer.getShort() & 0xFFFF;
 
-        checkLen(length, 2 + lineNumberTableSize << 2);
+        checkLen(length, 2 + (lineNumberTableSize << 2));
 
-        LineNumberInfo[] lineNumberTable = new LineNumberInfo[length];
+        LineNumberInfo[] lineNumberTable = new LineNumberInfo[lineNumberTableSize];
 
         for (int i = 0; i < lineNumberTableSize; i++)
             lineNumberTable[i] = LineNumberInfo.from(byteBuffer);

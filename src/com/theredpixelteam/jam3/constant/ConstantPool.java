@@ -1,6 +1,6 @@
 package com.theredpixelteam.jam3.constant;
 
-import com.theredpixelteam.jam3.attribute.AttributePool;
+import com.theredpixelteam.jam3.util.Jumper;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -21,11 +21,22 @@ public class ConstantPool {
 
     public static void from(@Nonnull ConstantPool dstPool,
                             @Nonnegative int length,
-                            @Nonnull AttributePool attributePool,
                             @Nonnull ByteBuffer byteBuffer)
     {
+        Jumper jumper = new Jumper();
+
         for (int i = 0; i < length; i++)
-            ConstantTag.from(dstPool, byteBuffer);
+        {
+            if (jumper.enabled())
+            {
+                dstPool.tags.add(null);
+
+                jumper.disable();
+                continue;
+            }
+
+            ConstantTag.from(dstPool, byteBuffer, jumper);
+        }
     }
 
     public @Nonnull byte[] toBytes()
@@ -35,6 +46,9 @@ public class ConstantPool {
         try {
             for (ConstantTag tag : tags)
             {
+                if (tag == null)
+                    continue;
+
                 baos.write(tag.getTagType().getTag());
                 baos.write(tag.toBytes());
             }

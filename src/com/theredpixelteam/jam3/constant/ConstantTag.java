@@ -1,5 +1,7 @@
 package com.theredpixelteam.jam3.constant;
 
+import com.theredpixelteam.jam3.util.Jumper;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,7 +50,8 @@ public abstract class ConstantTag {
     }
 
     public static ConstantTag from(@Nonnull ConstantPool constantPool,
-                                   @Nonnull ByteBuffer byteBuffer)
+                                   @Nonnull ByteBuffer byteBuffer,
+                                   @Nullable Jumper jumper)
     {
         int tag = byteBuffer.get() & 0xFF;
 
@@ -57,7 +60,12 @@ public abstract class ConstantTag {
         if (type == null)
             throw new ClassFormatError("Unknown tag type: " + tag);
 
-        return type.getInterpreter().from(constantPool, byteBuffer);
+        ConstantTag t = type.getInterpreter().from(constantPool, byteBuffer);
+
+        if (jumper != null && type.extended())
+            jumper.enable();
+
+        return t;
     }
 
     private final Type tagType;
@@ -71,8 +79,8 @@ public abstract class ConstantTag {
         UTF8                    (1,     ConstantTagUTF8::from,              ConstantTagUTF8::skip),
         INTEGER                 (3,     ConstantTagInteger::from,           ConstantTagInteger::skip),
         FLOAT                   (4,     ConstantTagFloat::from,             ConstantTagFloat::skip),
-        LONG                    (5,     ConstantTagLong::from,              ConstantTagLong::skip),
-        DOUBLE                  (6,     ConstantTagDouble::from,            ConstantTagDouble::skip),
+        LONG                    (5,     ConstantTagLong::from,              ConstantTagLong::skip,              true),
+        DOUBLE                  (6,     ConstantTagDouble::from,            ConstantTagDouble::skip,            true),
         CLASS                   (7,     ConstantTagClass::from,             ConstantTagClass::skip),
         STRING                  (8,     ConstantTagString::from,            ConstantTagString::skip),
         FIELD_REF               (9,     ConstantTagFieldRef::from,          ConstantTagFieldRef::skip),
@@ -87,9 +95,20 @@ public abstract class ConstantTag {
              TagInterpreter interpreter,
              Blank blank)
         {
+            this(tag, interpreter, blank, false);
+        }
+
+        Type(int tag,
+             TagInterpreter interpreter,
+             Blank blank,
+             boolean jumper)
+        {
             this.tag = tag;
             this.interpreter = interpreter;
             this.blank = blank;
+            this.jumper = jumper;
+
+            reg(this);
         }
 
         public int getTag()
@@ -103,6 +122,11 @@ public abstract class ConstantTag {
                 return null;
 
             return TYPES[tag];
+        }
+
+        public boolean extended()
+        {
+            return jumper;
         }
 
         private static void reg(Type tagType)
@@ -128,6 +152,8 @@ public abstract class ConstantTag {
         private final TagInterpreter interpreter;
 
         private final Blank blank;
+
+        private final boolean jumper;
 
         private static Type[] TYPES;
 

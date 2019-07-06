@@ -39,7 +39,9 @@ public class AttributeEntryCode extends AttributeEntry {
         int maxStack = byteBuffer.getShort() & 0xFFFF;
         int maxLocals = byteBuffer.getShort() & 0xFFFF;
 
-        byte[] code = new byte[byteBuffer.getInt()];
+        int codeLength = byteBuffer.getInt();
+
+        byte[] code = new byte[codeLength];
         byteBuffer.get(code);
 
         int exceptionTableSize = byteBuffer.getShort() & 0xFFFF;
@@ -48,9 +50,9 @@ public class AttributeEntryCode extends AttributeEntry {
         for (int i = 0; i < exceptionTableSize; i++)
             exceptionTable[i] = ExceptionInfo.from(constantPool, byteBuffer);
 
-        int attributePoolSize = byteBuffer.getShort() & 0xFFFF;
+        int attributeCount = byteBuffer.getShort() & 0xFFFF;
         AttributePool attributes = new AttributePool();
-        AttributePool.from(attributePool, attributePoolSize, constantPool, byteBuffer);
+        AttributePool.from(attributes, attributeCount, constantPool, byteBuffer);
 
         return attributePool.addEntry(
                 new AttributeEntryCode(attributePool, attributePool.nextIndex(), constantPool,

@@ -7,6 +7,7 @@ import com.theredpixelteam.jam3.constant.ConstantTagUTF8;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.crypto.AEADBadTagException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +43,7 @@ public abstract class AttributeEntry {
                 = constantPool.new TagRef(byteBuffer.getShort() & 0xFFFF);
 
         if (!nameTagRef.available())
-            throw new IllegalStateException("Tag ref not available");
+            throw new IllegalStateException("Tag ref not available: " + nameTagRef.getRefIndex());
 
         ConstantTagUTF8 nameTag = nameTagRef.get(ConstantTag.Type.UTF8, ConstantTagUTF8.class);
 
@@ -115,8 +116,56 @@ public abstract class AttributeEntry {
 
     public static @Nullable Type getType(@Nonnull String name)
     {
+        if (!TYPES_INITIALIZED)
+            initTypes();
+
         return TYPES.get(Objects.requireNonNull(name));
     }
+
+    static synchronized void initTypes()
+    {
+        if (TYPES_INITIALIZED)
+            return;
+
+        regType(AttributeEntryAnnotationDefault.NAME, AttributeEntryAnnotationDefault::from);
+        regType(AttributeEntryBootstrapMethods.NAME, AttributeEntryBootstrapMethods::from);
+        regType(AttributeEntryCode.NAME, AttributeEntryCode::from);
+        regType(AttributeEntryConstantValue.NAME, AttributeEntryConstantValue::from);
+        regType(AttributeEntryDeprecated.NAME, AttributeEntryDeprecated::from);
+        regType(AttributeEntryEnclosingMethod.NAME, AttributeEntryEnclosingMethod::from);
+        regType(AttributeEntryExceptions.NAME, AttributeEntryExceptions::from);
+        regType(AttributeEntryInnerClasses.NAME, AttributeEntryInnerClasses::from);
+        regType(AttributeEntryLineNumberTable.NAME, AttributeEntryLineNumberTable::from);
+        regType(AttributeEntryLocalVariableTable.NAME, AttributeEntryLocalVariableTable::from);
+        regType(AttributeEntryLocalVariableTypeTable.NAME, AttributeEntryLocalVariableTypeTable::from);
+        regType(AttributeEntryMethodParameters.NAME, AttributeEntryMethodParameters::from);
+        regType(AttributeEntryRuntimeInvisibleAnnotations.NAME, AttributeEntryRuntimeInvisibleAnnotations::from);
+        regType(AttributeEntryRuntimeInvisibleParameterAnnotations.NAME, AttributeEntryRuntimeInvisibleParameterAnnotations::from);
+        regType(AttributeEntryRuntimeInvisibleTypeAnnotations.NAME, AttributeEntryRuntimeInvisibleTypeAnnotations::from);
+        regType(AttributeEntryRuntimeVisibleAnnotations.NAME, AttributeEntryRuntimeVisibleAnnotations::from);
+        regType(AttributeEntryRuntimeVisibleParameterAnnotations.NAME, AttributeEntryRuntimeVisibleParameterAnnotations::from);
+        regType(AttributeEntryRuntimeVisibleTypeAnnotations.NAME, AttributeEntryRuntimeVisibleTypeAnnotations::from);
+        regType(AttributeEntrySignature.NAME, AttributeEntrySignature::from);
+        regType(AttributeEntrySourceDebugExtension.NAME, AttributeEntrySourceDebugExtension::from);
+        regType(AttributeEntrySourceFile.NAME, AttributeEntrySourceFile::from);
+        regType(AttributeEntryStackMapTable.NAME, AttributeEntryStackMapTable::from);
+        regType(AttributeEntrySynthetic.NAME, AttributeEntrySynthetic::from);
+
+        TYPES_INITIALIZED = true;
+    }
+
+    static void regType(@Nonnull String name,
+                        @Nonnull Type.AttributeInterpreter interpreter)
+    {
+        regType(new Type(name, interpreter));
+    }
+
+    static void regType(Type type)
+    {
+        TYPES.put(type.getName(), type);
+    }
+
+    private static volatile boolean TYPES_INITIALIZED = false;
 
     private final String name;
 
@@ -128,20 +177,15 @@ public abstract class AttributeEntry {
 
     private final AttributePool owner;
 
-    private static final Map<String, Type> TYPES = new HashMap<String, Type>()
-    {
-        {
-            // TODO
-        }
-    };
+    private static final Map<String, Type> TYPES = new HashMap<>();
 
     public static class Type
     {
-        Type(String name,
-             AttributeInterpreter interpreter)
+        public Type(@Nonnull String name,
+                    @Nonnull AttributeInterpreter interpreter)
         {
-            this.name = name;
-            this.interpreter = interpreter;
+            this.name = Objects.requireNonNull(name);
+            this.interpreter = Objects.requireNonNull(interpreter);
         }
 
         static Type of(String name,
