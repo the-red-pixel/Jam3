@@ -68,4 +68,6 @@ public final class BigEndian {
         baos.write((int)((u8value & 0x000000000000FF00L) >>> 8));
         baos.write((int)( u8value & 0x00000000000000FFL));
     }
+
+    public static final byte[] EMPTY_BYTES = new byte[0];
 }
