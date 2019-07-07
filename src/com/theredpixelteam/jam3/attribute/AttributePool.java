@@ -42,6 +42,9 @@ public class AttributePool {
 
         list.add(entry);
 
+        if (entry instanceof AttributeEntryUnknown)
+            unknownCount++;
+
         return entry;
     }
 
@@ -77,7 +80,25 @@ public class AttributePool {
         return baos.toByteArray();
     }
 
+    public void clear()
+    {
+        list.clear();
+        unknownCount = 0;
+    }
+
+    public int getUnknownCount()
+    {
+        return unknownCount;
+    }
+
+    public boolean hasUnknown()
+    {
+        return unknownCount > 0;
+    }
+
     private final List<AttributeEntry> list = new ArrayList<>();
+
+    private int unknownCount;
 
     public class EntryRef
     {

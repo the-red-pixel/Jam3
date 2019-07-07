@@ -54,10 +54,10 @@ public abstract class AttributeEntry {
 
         Type type = getType(name);
 
-        if (type == null) // TODO support custom attribute entries
-            throw new ClassFormatError("Unknown attribute: " + name);
-
         int len = byteBuffer.getInt();
+
+        if (type == null)
+            return AttributeEntryUnknown.from(dstPool, constantPool, len, nameTagRef, byteBuffer);
 
         return type.getInterpreter().from(dstPool, constantPool, len, nameTagRef, byteBuffer);
     }
@@ -154,10 +154,20 @@ public abstract class AttributeEntry {
         TYPES_INITIALIZED = true;
     }
 
-    static void regType(@Nonnull String name,
-                        @Nonnull Type.AttributeInterpreter interpreter)
+    public static void registerAttributeType(@Nonnull String name,
+                                             @Nonnull Type.AttributeInterpreter interpreter)
+    {
+        regType(name, interpreter);
+    }
+
+    static void regType(String name, Type.AttributeInterpreter interpreter)
     {
         regType(new Type(name, interpreter));
+    }
+
+    public static void registerAttributeType(@Nonnull Type type)
+    {
+        regType(Objects.requireNonNull(type));
     }
 
     static void regType(Type type)
