@@ -25,8 +25,18 @@ public class AccessibleObjectInfoBase {
         setAttributes(attributes);
     }
 
+    public static void skip(@Nonnull ByteBuffer byteBuffer)
+    {
+        byteBuffer.position(byteBuffer.position() + 6);
+
+        int attributeCount = byteBuffer.getShort() & 0xFFFF;
+
+        AttributePool.skip(attributeCount, byteBuffer);
+    }
+
     static @Nonnull <T extends AccessibleObjectInfoBase> T from(@Nonnull ConstantPool constantPool,
                                                                 @Nonnull ByteBuffer byteBuffer,
+                                                                boolean skipAttributes,
                                                                 @Nonnull Constructor<T> constructor)
     {
         int modifier = byteBuffer.getShort() & 0xFFFF;
@@ -40,7 +50,11 @@ public class AccessibleObjectInfoBase {
         int attributeCount = byteBuffer.getShort() & 0xFFFF;
 
         AttributePool attributes = new AttributePool();
-        AttributePool.from(attributes, attributeCount, constantPool, byteBuffer);
+
+        if (!skipAttributes)
+            AttributePool.from(attributes, attributeCount, constantPool, byteBuffer);
+        else
+            AttributePool.skip(attributeCount, byteBuffer);
 
         return constructor.construct(constantPool, modifier, nameTagRef, descriptorTagRef, attributes);
     }

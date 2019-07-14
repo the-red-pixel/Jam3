@@ -48,6 +48,13 @@ public class AttributePool {
         return entry;
     }
 
+    public static void skip(@Nonnegative int length,
+                            @Nonnull ByteBuffer byteBuffer)
+    {
+        for (int i = 0; i < length; i++)
+            AttributeEntry.skip(byteBuffer);
+    }
+
     public static void from(@Nonnull AttributePool dstPool,
                             @Nonnegative int length,
                             @Nonnull ConstantPool constantPool,

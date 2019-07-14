@@ -18,8 +18,9 @@ public class FieldInfo extends AccessibleObjectInfoBase {
     }
 
     public static @Nonnull FieldInfo from(@Nonnull ConstantPool constantPool,
-                                          @Nonnull ByteBuffer byteBuffer)
+                                          @Nonnull ByteBuffer byteBuffer,
+                                          boolean skipAttributes)
     {
-        return from(constantPool, byteBuffer, FieldInfo::new);
+        return from(constantPool, byteBuffer, skipAttributes, FieldInfo::new);
     }
 }

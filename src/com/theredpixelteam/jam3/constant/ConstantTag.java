@@ -49,9 +49,7 @@ public abstract class ConstantTag {
         return checkRef(owner, tagRef);
     }
 
-    public static ConstantTag from(@Nonnull ConstantPool constantPool,
-                                   @Nonnull ByteBuffer byteBuffer,
-                                   @Nullable Jumper jumper)
+    static Type requireTagType(@Nonnull ByteBuffer byteBuffer)
     {
         int tag = byteBuffer.get() & 0xFF;
 
@@ -60,12 +58,42 @@ public abstract class ConstantTag {
         if (type == null)
             throw new ClassFormatError("Unknown tag type: " + tag);
 
-        ConstantTag t = type.getInterpreter().from(constantPool, byteBuffer);
+        return type;
+    }
 
+    static void setJumper(Jumper jumper, Type type)
+    {
         if (jumper != null && type.extended())
             jumper.enable();
+    }
 
-        return t;
+    public static void skip(@Nonnull ByteBuffer byteBuffer,
+                            @Nullable Jumper jumper)
+    {
+        Type type = requireTagType(byteBuffer);
+
+        setJumper(jumper, type);
+
+        type.getBlank().skip(byteBuffer);
+    }
+
+    public static ConstantTag from(@Nonnull ConstantPool constantPool,
+                                   @Nonnull ByteBuffer byteBuffer,
+                                   @Nullable Jumper jumper)
+    {
+        return from(constantPool, requireTagType(byteBuffer), byteBuffer, jumper);
+    }
+
+    public static ConstantTag from(@Nonnull ConstantPool constantPool,
+                                   @Nonnull Type type,
+                                   @Nonnull ByteBuffer byteBuffer,
+                                   @Nonnull Jumper jumper)
+    {
+        ConstantTag tag = type.getInterpreter().from(constantPool, byteBuffer);
+
+        setJumper(jumper, type);
+
+        return tag;
     }
 
     private final Type tagType;

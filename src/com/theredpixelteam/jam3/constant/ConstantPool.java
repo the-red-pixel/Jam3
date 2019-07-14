@@ -8,15 +8,75 @@ import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.List;
+import java.util.*;
 
 public class ConstantPool {
     public ConstantPool()
     {
         (tags = new ArrayList<>()).add(null);
+
+        this.nullTagRef = this.new TagRef(0);
+    }
+
+    public static void skip(@Nonnegative int length,
+                            @Nonnull ByteBuffer byteBuffer)
+    {
+        Jumper jumper = new Jumper();
+
+        for (int i = 0; i < length; i++)
+        {
+            if (jumper.enabled())
+            {
+                jumper.disable();
+                continue;
+            }
+
+            ConstantTag.skip(byteBuffer, jumper);
+        }
+    }
+
+    public static void selectFrom(@Nonnull ConstantPool dstPool,
+                                  @Nonnegative int length,
+                                  @Nonnull ByteBuffer byteBuffer,
+                                  @Nonnull LinkedList<Integer> loadFlow,
+                                  @Nonnull Collection<ConstantTag.Type> alwaysLoad)
+    {
+        Jumper jumper = new Jumper();
+
+        for (int i = 0; i < length; i++)
+        {
+            if (jumper.enabled())
+            {
+                dstPool.tags.add(null);
+
+                jumper.disable();
+                continue;
+            }
+
+            int flowTop = -1;
+            if (!loadFlow.isEmpty() && (flowTop = loadFlow.peek()) < dstPool.nextIndex())
+                throw new IllegalArgumentException("Load flow pointing placeholder slot");
+
+            ConstantTag.Type type = ConstantTag.requireTagType(byteBuffer);
+
+            boolean flowFlag = false;
+
+            if (flowTop == dstPool.nextIndex())
+                flowFlag = true;
+            else if (alwaysLoad.contains(type))
+                ;
+            else
+            {
+                dstPool.tags.add(null);
+
+                continue;
+            }
+
+            ConstantTag.from(dstPool, type, byteBuffer, jumper);
+
+            if (flowFlag)
+                loadFlow.poll();
+        }
     }
 
     public static void from(@Nonnull ConstantPool dstPool,
@@ -71,9 +131,9 @@ public class ConstantPool {
         return tags.size();
     }
 
-    <T extends ConstantTag> T addTag(T tag)
+    public <T extends ConstantTag> T addTag(@Nullable T tag)
     {
-        if (tag.getIndex() != nextIndex())
+        if (tag != null && tag.getIndex() != nextIndex())
             throw new ConcurrentModificationException();
 
         tags.add(tag);
@@ -92,6 +152,8 @@ public class ConstantPool {
     }
 
     private final List<ConstantTag> tags;
+
+    public final TagRef nullTagRef;
 
     public class TagRef
     {
