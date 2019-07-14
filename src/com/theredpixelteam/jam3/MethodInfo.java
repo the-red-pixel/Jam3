@@ -18,6 +18,12 @@ public class MethodInfo extends AccessibleObjectInfoBase {
     }
 
     public static @Nonnull MethodInfo from(@Nonnull ConstantPool constantPool,
+                                           @Nonnull ByteBuffer byteBuffer)
+    {
+        return from(constantPool, byteBuffer);
+    }
+
+    public static @Nonnull MethodInfo from(@Nonnull ConstantPool constantPool,
                                            @Nonnull ByteBuffer byteBuffer,
                                            boolean skipAttributes)
     {

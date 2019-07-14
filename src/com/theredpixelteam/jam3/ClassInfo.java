@@ -3,10 +3,13 @@ package com.theredpixelteam.jam3;
 import com.theredpixelteam.jam3.attribute.AttributePool;
 import com.theredpixelteam.jam3.constant.ConstantPool;
 import com.theredpixelteam.jam3.constant.ConstantTag;
+import com.theredpixelteam.jam3.constant.ConstantTagClass;
+import com.theredpixelteam.jam3.constant.ConstantTagUTF8;
 import com.theredpixelteam.jam3.util.BigEndian;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -279,9 +282,29 @@ public class ClassInfo {
         this.modifiers = modifiers;
     }
 
+    static @Nullable String getClassName(@Nonnull ConstantPool.TagRef tagRef)
+    {
+        ConstantTagClass classTag = tagRef.get(ConstantTag.Type.CLASS, ConstantTagClass.class);
+
+        if (classTag == null)
+            return null;
+
+        ConstantTagUTF8 utf8Tag = classTag.getUTF8Tag();
+
+        if (utf8Tag == null)
+            return null;
+
+        return utf8Tag.getString();
+    }
+
     public @Nonnull ConstantPool.TagRef getThisClassTagRef()
     {
         return thisClassTagRef;
+    }
+
+    public @Nullable String getThisClassName()
+    {
+        return getClassName(thisClassTagRef);
     }
 
     public void setThisClassTagRef(@Nonnull ConstantPool.TagRef thisClassTagRef)
@@ -292,6 +315,11 @@ public class ClassInfo {
     public @Nonnull ConstantPool.TagRef getSuperClassTagRef()
     {
         return superClassTagRef;
+    }
+
+    public @Nonnull String getSuperClassName()
+    {
+        return getClassName(superClassTagRef);
     }
 
     public void setSuperClassTagRef(@Nonnull ConstantPool.TagRef superClassTagRef)
